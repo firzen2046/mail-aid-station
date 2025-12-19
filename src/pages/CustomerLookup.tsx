@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Building2, Search, Mail, Phone, MessageCircle, Package, ChevronDown, ChevronUp, Calendar, LogIn } from 'lucide-react';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 import { zhTW } from 'date-fns/locale';
 
 interface Customer {
@@ -38,6 +39,7 @@ export default function CustomerLookup() {
   const [showHistory, setShowHistory] = useState(false);
   const [monthFilter, setMonthFilter] = useState<string>('all');
   const [searched, setSearched] = useState(false);
+  const { toast } = useToast();
 
   const handleSearch = async () => {
     if (!phone.trim()) return;
@@ -45,36 +47,38 @@ export default function CustomerLookup() {
     setSearched(true);
 
     try {
-      const { data: customerData, error: customerError } = await supabase
-        .from('customers')
-        .select('*')
-        .eq('phone', phone.trim())
-        .maybeSingle();
+      // Use edge function for secure public lookup
+      const { data, error } = await supabase.functions.invoke('customer-lookup', {
+        body: { phone: phone.trim() },
+      });
 
-      if (customerError) throw customerError;
+      if (error) {
+        console.error('Lookup error:', error);
+        toast({
+          variant: 'destructive',
+          title: '查詢失敗',
+          description: '請稍後再試',
+        });
+        return;
+      }
 
-      if (!customerData) {
+      if (!data.customer) {
         setCustomer(null);
         setPendingMails([]);
         setPickedUpMails([]);
         return;
       }
 
-      setCustomer(customerData);
-
-      const { data: mailsData, error: mailsError } = await supabase
-        .from('mails')
-        .select('*')
-        .eq('customer_id', customerData.id)
-        .order('created_at', { ascending: false });
-
-      if (mailsError) throw mailsError;
-
-      const mails = mailsData || [];
-      setPendingMails(mails.filter(m => m.status === '待取'));
-      setPickedUpMails(mails.filter(m => m.status === '已取'));
+      setCustomer(data.customer);
+      setPendingMails(data.pendingMails || []);
+      setPickedUpMails(data.pickedUpMails || []);
     } catch (error) {
       console.error('Search error:', error);
+      toast({
+        variant: 'destructive',
+        title: '查詢失敗',
+        description: '請稍後再試',
+      });
     } finally {
       setLoading(false);
     }

@@ -1,1 +1,4 @@
 project_id = "kpqlcmesbultxbynbfbl"
+
+[functions.customer-lookup]
+verify_jwt = false
