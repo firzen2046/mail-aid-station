@@ -9,7 +9,8 @@ import {
   Mail, 
   Plus, 
   LogOut,
-  ExternalLink
+  ExternalLink,
+  Settings
 } from 'lucide-react';
 
 const navItems = [
@@ -17,6 +18,7 @@ const navItems = [
   { to: '/dashboard/customers', icon: Users, label: '客戶列表' },
   { to: '/dashboard/mails', icon: Mail, label: '郵件管理' },
   { to: '/dashboard/new-mail', icon: Plus, label: '新增郵件' },
+  { to: '/dashboard/settings', icon: Settings, label: '系統設置' },
 ];
 
 export default function Sidebar() {
