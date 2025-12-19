@@ -44,7 +44,6 @@ export default function Customers() {
 
       if (error) throw error;
 
-      // Get pending counts for each customer
       const customersWithCounts: CustomerWithCount[] = [];
       for (const customer of customersData || []) {
         const { count } = await supabase
@@ -113,22 +112,22 @@ export default function Customers() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">客戶列表</h1>
-          <p className="text-muted-foreground">共 {customers.length} 位客戶</p>
+          <h1 className="text-3xl font-bold">客戶列表</h1>
+          <p className="text-muted-foreground mt-1">共 {customers.length} 位客戶</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
+            <Button size="lg" className="shadow-md">
+              <Plus className="w-5 h-5 mr-2" />
               新增客戶
             </Button>
           </DialogTrigger>
@@ -143,6 +142,7 @@ export default function Customers() {
                   id="full_name"
                   value={formData.full_name}
                   onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  placeholder="客戶全名"
                   required
                 />
               </div>
@@ -153,6 +153,7 @@ export default function Customers() {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="電話號碼"
                   required
                 />
               </div>
@@ -163,6 +164,7 @@ export default function Customers() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="電郵地址 (選填)"
                 />
               </div>
               <div className="space-y-2">
@@ -171,9 +173,10 @@ export default function Customers() {
                   id="notes"
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  placeholder="備註 (選填)"
                 />
               </div>
-              <Button type="submit" className="w-full">新增</Button>
+              <Button type="submit" className="w-full">新增客戶</Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -181,61 +184,74 @@ export default function Customers() {
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           placeholder="搜尋客戶 (姓名、電話、編號)"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-10"
+          className="pl-12 h-12 text-base"
         />
       </div>
 
       {/* Customer List */}
-      <Card>
+      <Card className="border-0 shadow-lg">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5" />
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Users className="w-5 h-5 text-primary" />
             客戶資料
           </CardTitle>
         </CardHeader>
         <CardContent>
           {filteredCustomers.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">
-              {search ? '找不到符合的客戶' : '尚無客戶資料'}
-            </p>
+            <div className="text-center py-12">
+              <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
+                <Users className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground text-lg">
+                {search ? '找不到符合的客戶' : '尚無客戶資料'}
+              </p>
+            </div>
           ) : (
-            <div className="space-y-2">
-              {filteredCustomers.map((customer) => (
+            <div className="space-y-3">
+              {filteredCustomers.map((customer, index) => (
                 <Link
                   key={customer.id}
                   to={`/dashboard/customers/${customer.id}`}
-                  className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
+                  className="flex items-center justify-between p-4 rounded-xl border hover:bg-muted/50 hover:shadow-md transition-all duration-200"
+                  style={{ animationDelay: `${index * 30}ms` }}
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{customer.full_name}</span>
-                      <Badge variant="outline" className="text-xs">
-                        {customer.customer_id}
-                      </Badge>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                      {customer.full_name.charAt(0)}
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Phone className="w-3 h-3" />
-                        {customer.phone}
-                      </span>
-                      {customer.email && (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-lg">{customer.full_name}</span>
+                        <Badge variant="outline" className="text-xs font-mono">
+                          {customer.customer_id}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          <Mail className="w-3 h-3" />
-                          {customer.email}
+                          <Phone className="w-3.5 h-3.5" />
+                          {customer.phone}
                         </span>
-                      )}
+                        {customer.email && (
+                          <span className="flex items-center gap-1">
+                            <Mail className="w-3.5 h-3.5" />
+                            {customer.email}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     {customer.pending_count > 0 && (
-                      <Badge variant="destructive">{customer.pending_count} 件待取</Badge>
+                      <Badge variant="destructive" className="px-3 py-1">
+                        {customer.pending_count} 件待取
+                      </Badge>
                     )}
-                    <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                    <ArrowRight className="w-5 h-5 text-muted-foreground" />
                   </div>
                 </Link>
               ))}
