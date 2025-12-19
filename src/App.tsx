@@ -14,6 +14,7 @@ import Customers from "./pages/Customers";
 import CustomerDetail from "./pages/CustomerDetail";
 import NewMail from "./pages/NewMail";
 import Mails from "./pages/Mails";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="customers/:id" element={<CustomerDetail />} />
               <Route path="mails" element={<Mails />} />
               <Route path="new-mail" element={<NewMail />} />
+              <Route path="settings" element={<Settings />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
